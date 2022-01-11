@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <title>copyOnKey</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+
+        input {
+            width: 160px;
+            margin-left: 20px;
+            margin-bottom: 20px;
+            color: white;
+            background-color: rgb(71, 94, 129);
+            font-size: 1.3em;
+        }
+
+        a:visited {
+            color: rgb(102, 205, 170);
+        }
+
+        a {
+            color: rgb(102, 205, 170);
+        }
+
+        textarea {
+            background-color: grey;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            /* grid-template-columns: repeat(auto-fill, minmax(200px, 2fr)); */
+            background-color: #1f1f1f;
+
+        }
+
+        .grid-item {
+            background-color: rgba(53, 50, 50, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            padding: 2px;
+
+        }
+
+        button {
+            font-size: 1.3em;
+            background-color: grey;
+            border-color: grey;
+        }
+
+        .toCopyIn {
+            cursor: pointer;
+        }
+
+        .smallText {
+            font-size: 0.7em;
+        }
+    </style>
+    <script>
+        let stop = false;
+        let shortCutArray = [];
+        if (localStorage.shortCutArray) {
+            shortCutArray = JSON.parse(localStorage.shortCutArray);
+        }
+
+        let date = new Date();
+        dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`
+
+
+
+        let theArray = [
+      
+        ]
+        theArray = theArray.concat(shortCutArray)
+
+        letterArray = [];
+        for (let letter of theArray) {
+            letterArray.push(letter[0])
+        }
+
+    </script>
+</head>
+
+<body>
+    <main>
+        <h2>Lista</h2>
+        <div class="grid-container" id="list"></div>
+        <br>
+
+
+
+
+    </main>
+
+    <br><br>
+    <footer>
+        <button onclick="stop=true;">Stop</button>
+        <br><br>
+        Key:<input type="text" name="" id="inKey">
+        Name:<input type="text" name="" id="inName">
+        Value:<input type="text" name="" id="inValue">
+        <br> <button onclick="createNewSC()">Create</button>
+
+        <div class="smallText">
+            <p>Just Write the key (and nothing else) to delete</p>
+            <p>[Stop] to stop keyboard events </p>
+        </div>
+
+    </footer>
+
+
+
+
+
+    <script>
+
+
+        document.querySelector("#inKey").value = "";
+        document.querySelector("#inName").value = "";
+        document.querySelector("#inValue").value = "";
+
+        let btnConvert = document.getElementById("btnConvert");
+
+
+        let domTxt = document.getElementById("domTxt");
+
+
+
+
+
+        let inputs = [];
+
+        let list = document.getElementById("list");
+
+
+        let timesCopied = 0;
+
+        let counter = 0;
+
+
+        for (let section of theArray) {
+
+            let div = document.createElement("div");
+            let input = document.createElement("input");
+            let span = document.createElement("span");
+
+
+            span.innerText = " " + section[0] + ".";
+
+            span.innerText += " " + section[1];
+
+            input.id = section[0];
+            inputs.push(input);
+
+            counter += 1;
+
+
+
+
+            input.value = section[2];
+
+
+
+
+
+
+
+
+
+            input.readOnly = true;
+            input.classList.add("toCopyIn")
+            div.appendChild(span);
+            div.appendChild(document.createElement("br"));
+            div.appendChild(input);
+
+            //--
+            input.addEventListener("click", function () {
+                let value = input.value;
+                // console.log(value);
+                if (value.includes("--l")) {
+                    value = value.replace("--l", "");
+                    window.open(value, "_blank")
+                } else {
+                    input.select();
+                    document.execCommand("Copy");
+                }
+            });
+            //--
+            div.classList.add("grid-item")
+
+
+
+            list.appendChild(div);
+
+        }
+
+
+
+
+
+
+
+        document.addEventListener("keydown", (e) => {
+
+            if (stop === false) {
+                if (letterArray.includes(e.key.toLowerCase())) {
+                    if (e.ctrlKey) {
+                        return
+                    }
+
+                    let key = e.key.toLowerCase();
+
+
+                    if (document.getElementById(key)) {
+                        let value = document.getElementById(key).value;
+                        // console.log(value);
+                        if (value.includes("--l")) {
+                            value = value.replace("--l", "");
+                            window.open(value, "_blank")
+                        } else {
+                            document.getElementById(key).select();
+                            document.execCommand("Copy");
+                        }
+                    }
+
+
+
+                }
+            }
+
+
+
+        });
+
+
+
+        function createNewSC() {
+            inKeyValue = document.querySelector("#inKey").value;
+            for (let i = 0; i < shortCutArray.length; i++) {
+                if (shortCutArray[i][0] === inKeyValue) {
+                    if (document.querySelector("#inName").value === "" && document.querySelector("#inValue").value === "") {
+                        shortCutArray.splice(i, 1);
+                    } else {
+                        shortCutArray[i] = [
+                            document.querySelector("#inKey").value,
+                            document.querySelector("#inName").value,
+                            document.querySelector("#inValue").value,
+                        ]
+                    }
+
+                    localStorage.shortCutArray = JSON.stringify(shortCutArray)
+                    return;
+                }
+
+            }
+
+            if (document.querySelector("#inKey").value === "" &&
+                document.querySelector("#inName").value === "") {
+                if (document.querySelector("#inValue").value === "d") {
+                    downloadasTextFile("copyOnKeyBackUp.txt", JSON.stringify(shortCutArray));
+                    return;
+                }
+                if (document.querySelector("#inValue").value.startsWith("ll")) {
+                    localStorage.shortCutArray = document.querySelector("#inValue").value.replace("ll", "");
+                    return;
+                }
+
+
+            }
+            shortCutArray.push(
+                [
+                    document.querySelector("#inKey").value,
+                    document.querySelector("#inName").value,
+                    document.querySelector("#inValue").value,
+                ]
+            )
+            localStorage.shortCutArray = JSON.stringify(shortCutArray)
+        }
+
+        function clearSC() {
+            localStorage.removeItem("shortCutArray");
+        }
+
+        function downloadasTextFile(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+    </script>
+
+</body>
+
+</html>
